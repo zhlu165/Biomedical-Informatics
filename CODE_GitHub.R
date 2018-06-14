@@ -157,8 +157,8 @@ all_matrix=matrix(length(ID_D),15351,47)
 ADE_all_rep=replicate(47, ADE_all)
 ##################################################
 
-N00D=all_matrix-N01D-N10D+N11D
-N001=ADE_all_rep-N011-N101+N111
+N00D=all_matrix-N01D-N10D-N11D
+N001=ADE_all_rep-N011-N101-N111
 
 colnames(N00D)=drug_pair_vector
 write.csv(N00D,"N00D.csv",row.names=ADE_names)
