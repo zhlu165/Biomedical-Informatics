@@ -8,8 +8,8 @@ ID_ADE=names(temp_ADE_1)
 ### ID_ADE
 
 trump=intersect(ID_D,ID_ADE)
-id_1=pmatch(ID_D,trump)
-id_2=pmatch(ID_ADE,trump)
+id_1=match(ID_D,trump)
+id_2=match(ID_ADE,trump)
 
 temp_drug=temp_drug_1[is.na(id_1)==F] ### Change name，temp->temp_drug
 temp_ADE=temp_ADE_1[is.na(id_2)==F]
@@ -38,12 +38,12 @@ drug_ADE_all=matrix(0,15351,1764)
 for(i in 1:4077447)
 {
   try_drug=temp_drug[[i]]
-  try_drug_name=dic_names[pmatch(try_drug,dic_ID)]
+  try_drug_name=dic_names[match(try_drug,dic_ID)]
   
   try_ADE=temp_ADE[[i]]
   
-  x_ADE=pmatch(try_ADE,ADE_names)
-  y_drug=pmatch(try_drug_name,dic_names)
+  x_ADE=match(try_ADE,ADE_names)
+  y_drug=match(try_drug_name,dic_names)
   ADE_all[x_ADE]=ADE_all[x_ADE]+1
   drug_all[y_drug]=drug_all[y_drug]+1
   drug_ADE_all[x_ADE,y_drug]=drug_ADE_all[x_ADE,y_drug]+1
@@ -79,18 +79,18 @@ N111=matrix(0,15351,47)
 for(j in 1:4077447)
 {
   try_drug=temp_drug[[j]]  ### drug information
-  try_drug_name=dic_names[pmatch(try_drug,dic_ID)]
+  try_drug_name=dic_names[match(try_drug,dic_ID)]
   
   a=rep(try_drug_name, length(try_drug_name))
   b=rep(try_drug_name, each=length(try_drug_name))
   c=paste(a,b)
   
-  temp_drug_pair=pmatch(c,drug_pair_vector)
+  temp_drug_pair=match(c,drug_pair_vector)
   temp_drug_pair=temp_drug_pair[!is.na(temp_drug_pair)]
   
   try_ADE=temp_ADE[[j]] ### ADE information
   
-  temp_drug_ADE=pmatch(try_ADE,ADE_names)
+  temp_drug_ADE=match(try_ADE,ADE_names)
   
   N11D[,temp_drug_pair]=N11D[,temp_drug_pair]+1
   N111[temp_drug_ADE,temp_drug_pair]=N111[temp_drug_ADE,temp_drug_pair]+1
@@ -110,7 +110,7 @@ N10D=matrix(0,15351,47)
 N101=matrix(0,15351,47)
 
 drug_1_vector=as.character(drug_1$x)
-drug1_index_in_all=pmatch(drug_1_vector, dic_names, duplicate=1)
+drug1_index_in_all=match(drug_1_vector, dic_names, duplicate=1)
 
 ######convert drug_all from vector to matrix######
 drug_all_t=t(drug_all)
@@ -134,7 +134,7 @@ N01D=matrix(0,15351,47)
 N011=matrix(0,15351,47)
 
 drug_2_vector=as.character(drug_2$y)
-drug2_index_in_all=pmatch(drug_2_vector, dic_names, duplicate=1)
+drug2_index_in_all=match(drug_2_vector, dic_names, duplicate=1)
 
 N01D=drug_all_t_rep[,drug2_index_in_all]
 N01D=N01D-N11D
@@ -165,6 +165,45 @@ write.csv(N00D,"N00D.csv",row.names=ADE_names)
 colnames(N001)=drug_pair_vector
 write.csv(N001,"N001.csv",row.names=ADE_names)
 
+########################↓↓↓↓↓2 Drugs + 1 ADE↓↓↓↓↓#########################
+##############################Verification###############################
+
+firstDrug=("FLUCONAZOLE")
+secondDrug=("METHADONE")
+both=c("FLUCONAZOLE","METHADONE")
+
+drug_combo_ADE=matrix(0,4,2)
+
+ADE=("RHABDOMYOLYSIS")
+
+for(i in 1:4077447)
+{
+  try_drug=temp_drug[[i]]  ### drug information
+  try_drug_name=dic_names[match(try_drug,dic_ID)]
+  
+  temp_firstDrug=1-is.na(match(firstDrug,try_drug_name))
+  temp_secondDrug=1-is.na(match(secondDrug,try_drug_name))
+  temp_neither=0+(sum(is.na(match(both,try_drug_name)))==2)
+  temp_both=0+(sum(is.na(match(both,try_drug_name)))==0)
+  
+  drug_combo=matrix(0,4,2)
+  drug_combo[1,]=temp_neither
+  drug_combo[2,]=temp_firstDrug-temp_both
+  drug_combo[3,]=temp_secondDrug-temp_both
+  drug_combo[4,]=temp_both
+  
+  try_ADE=temp_ADE[[i]] ### ADE information
+  temp_drug_ADE=1-is.na(match(ADE,try_ADE)) #match-->match
+  
+  drug_combo[,1]=drug_combo[,1]*temp_drug_ADE
+  
+  drug_combo_ADE=drug_combo_ADE+drug_combo
+  
+  cat("iter=",i,"\n")
+}
+
+drug_combo_ADE
+
 ########################Omega Calculation#########################
 
 f00=N001/N00D
@@ -175,47 +214,95 @@ f11=N111/N11D
 EXP_1=pmax((f00/(1-f00)),(f01/(1-f01)))+pmax((f00/(1-f00)),(f10/(1-f10)))-(f00/(1-f00))+1
 EXP_2=1-1/EXP_1
 EXP=EXP_2*(N11D)
-Omega=log((N111/EXP),base=2)
-write.csv(Omega,"Omega.csv")
-Omega_sd=1/(N111*(log(2))^2)
-write.csv(Omega_sd,"Omega_sd.csv")
-Omega_025=Omega-1.96*Omega_sd
-write.csv(Omega_025,"Omega_025.csv")
+Omega_unfiltered=log((N111/EXP),base=2)
+write.csv(Omega_unfiltered,"Omega_unfiltered.csv",row.names=ADE_names)
+Omega_sd_unfiltered=1/(N111*(log(2))^2)
+write.csv(Omega_sd_unfiltered,"Omega_sd_unfiltered.csv",row.names=ADE_names)
+Omega_025_unfiltered=Omega_unfiltered-1.96*Omega_sd_unfiltered
+write.csv(Omega_025_unfiltered,"Omega_025_unfiltered.csv",row.names=ADE_names)
 
-########################↓↓↓↓↓2 Drugs + 1 ADE↓↓↓↓↓#########################
+#########################Cluster Analysis#########################
+####################Remove -Inf Cols and Rows####################
+##############################Omega##############################
 
-simv=("FLUCONAZOLE")
-niso=("METHADONE")
-both=c("FLUCONAZOLE","METHADONE")
+rownames(Omega_unfiltered)=ADE_names
+Omega_unfiltered[Omega_unfiltered==-Inf] <- 0
+Omega_unfiltered[Omega_unfiltered==Inf] <- 0
 
-drug_combo_ADE=matrix(0,4,2)
+Omega_col=rep(0,ncol(Omega_unfiltered))
+Omega_row=rep(0,nrow(Omega_unfiltered))
 
-ADE=("RHABDOMYOLYSIS")
-
-for(i in 1:4077447)
+for(m in 1:ncol(Omega_unfiltered))
 {
-  try_drug=temp_drug[[i]]  ### drug information
-  try_drug_name=dic_names[pmatch(try_drug,dic_ID)]
-  
-  temp_simv=1-is.na(pmatch(simv,try_drug_name))  ### simv yes or no
-  temp_niso=1-is.na(pmatch(niso,try_drug_name))
-  temp_neither=0+(sum(is.na(pmatch(both,try_drug_name)))==2)
-  temp_both=0+(sum(is.na(pmatch(both,try_drug_name)))==0)
-  
-  drug_combo=matrix(0,4,2)
-  drug_combo[1,]=temp_neither
-  drug_combo[2,]=temp_simv-temp_both
-  drug_combo[3,]=temp_niso-temp_both
-  drug_combo[4,]=temp_both
-  
-  try_ADE=temp_ADE[[i]] ### ADE information
-  temp_drug_ADE=1-is.na(pmatch(ADE,try_ADE))
-  
-  drug_combo[,1]=drug_combo[,1]*temp_drug_ADE
-  
-  drug_combo_ADE=drug_combo_ADE+drug_combo
-  
-  cat("iter=",i,"\n")
+  Omega_col[m]=sum(Omega_unfiltered[,m])
 }
 
-drug_combo_ADE
+for(n in 1:nrow(Omega_unfiltered))
+{
+  Omega_row[n]=sum(Omega_unfiltered[n,])
+}
+
+Omega=Omega_unfiltered[Omega_row!=0,Omega_col!=0]
+dim(Omega)
+
+write.csv(Omega,"Omega.csv")
+
+############################Omega_sd############################
+
+rownames(Omega_sd_unfiltered)=ADE_names
+Omega_sd_unfiltered[Omega_sd_unfiltered==Inf] <- 0
+Omega_sd_unfiltered[Omega_sd_unfiltered==-Inf] <- 0
+
+Omega_col=rep(0,ncol(Omega_sd_unfiltered))
+Omega_row=rep(0,nrow(Omega_sd_unfiltered))
+
+for(m in 1:ncol(Omega_sd_unfiltered))
+{
+  Omega_col[m]=sum(Omega_sd_unfiltered[,m])
+}
+
+for(n in 1:nrow(Omega_sd_unfiltered))
+{
+  Omega_row[n]=sum(Omega_sd_unfiltered[n,])
+}
+
+Omega_sd=Omega_sd_unfiltered[Omega_row!=0,Omega_col!=0]
+dim(Omega_sd)
+
+write.csv(Omega_sd,"Omega_sd.csv")
+
+############################Omega_025############################
+
+rownames(Omega_025_unfiltered)=ADE_names
+Omega_025_unfiltered[Omega_025_unfiltered==-Inf] <- 0
+Omega_025_unfiltered[Omega_025_unfiltered==Inf] <- 0
+
+Omega_col=rep(0,ncol(Omega_025_unfiltered))
+Omega_row=rep(0,nrow(Omega_025_unfiltered))
+
+for(m in 1:ncol(Omega_025_unfiltered))
+{
+  Omega_col[m]=sum(Omega_025_unfiltered[,m])
+}
+
+for(n in 1:nrow(Omega_025_unfiltered))
+{
+  Omega_row[n]=sum(Omega_025_unfiltered[n,])
+}
+
+Omega_025=Omega_025_unfiltered[Omega_row!=0,Omega_col!=0]
+dim(Omega_025)
+
+write.csv(Omega_025,"Omega_025.csv")
+
+###############################Plot###############################
+
+library(gplots)
+colfunc <- colorRampPalette(c("green","red","blue"))
+
+jpeg("test 1.jpg", width=18, height=24, units="in", res=1000)
+res <- heatmap.2(Omega,col=colfunc,scale="column",main="",trace="none",cexCol=1.5,cexRow=0.1,margins=c(30,30))
+dev.off()
+
+Order_M=Omega[rev(res$rowInd),(res$colInd)]
+write.csv(Order_M,"Order_Result_1.csv")
