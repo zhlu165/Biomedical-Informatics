@@ -110,7 +110,7 @@ N10D=matrix(0,15351,47)
 N101=matrix(0,15351,47)
 
 drug_1_vector=as.character(drug_1$x)
-drug1_index_in_all=match(drug_1_vector, dic_names, duplicate=1)
+drug1_index_in_all=match(drug_1_vector, dic_names)
 
 ######convert drug_all from vector to matrix######
 drug_all_t=t(drug_all)
@@ -134,7 +134,7 @@ N01D=matrix(0,15351,47)
 N011=matrix(0,15351,47)
 
 drug_2_vector=as.character(drug_2$y)
-drug2_index_in_all=match(drug_2_vector, dic_names, duplicate=1)
+drug2_index_in_all=match(drug_2_vector, dic_names)
 
 N01D=drug_all_t_rep[,drug2_index_in_all]
 N01D=N01D-N11D
