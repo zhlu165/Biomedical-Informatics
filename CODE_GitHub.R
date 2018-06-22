@@ -214,15 +214,43 @@ f11=N111/N11D
 EXP_1=pmax((f00/(1-f00)),(f01/(1-f01)))+pmax((f00/(1-f00)),(f10/(1-f10)))-(f00/(1-f00))+1
 EXP_2=1-1/EXP_1
 EXP=EXP_2*(N11D)
-omega_unfiltered=log((N111/EXP),base=2)
+
+omega_0_unfiltered=log((N111/EXP),base=2)
+write.csv(omega_0_unfiltered,"omega_0_unfiltered.csv",row.names=ADE_names)
+
+omega_unfiltered=log(((N111+0.5)/(EXP+0.5)),base=2)
 write.csv(omega_unfiltered,"omega_unfiltered.csv",row.names=ADE_names)
+
 omega_sd_unfiltered=1/(N111*(log(2))^2)
-write.csv(omega_sd_unfiltered,"omega_sd_unfiltered.csv",row.names=ADE_names)
-omega_025_unfiltered=omega_unfiltered-1.96*omega_sd_unfiltered
+omega_025_unfiltered=omega_0_unfiltered-1.96*omega_sd_unfiltered
 write.csv(omega_025_unfiltered,"omega_025_unfiltered.csv",row.names=ADE_names)
 
 #########################Cluster Analysis#########################
 #################Remove -Inf/Inf/NA cols and rows#################
+#############################omega_0#############################
+
+rownames(omega_0_unfiltered)=ADE_names
+omega_0_unfiltered[omega_0_unfiltered==-Inf] <- 0
+omega_0_unfiltered[omega_0_unfiltered==Inf] <- 0
+
+omega_col=rep(0,ncol(omega_0_unfiltered))
+omega_row=rep(0,nrow(omega_0_unfiltered))
+
+for(m in 1:ncol(omega_0_unfiltered))
+{
+  omega_col[m]=sum(omega_0_unfiltered[,m])
+}
+
+for(n in 1:nrow(omega_0_unfiltered))
+{
+  omega_row[n]=sum(omega_0_unfiltered[n,])
+}
+
+omega_0=omega_0_unfiltered[omega_row!=0,omega_col!=0]
+dim(omega_0)
+
+write.csv(omega_0,"omega_0.csv")
+
 ##############################omega##############################
 
 rownames(omega_unfiltered)=ADE_names
@@ -246,30 +274,6 @@ omega=omega_unfiltered[omega_row!=0,omega_col!=0]
 dim(omega)
 
 write.csv(omega,"omega.csv")
-
-############################omega_sd############################
-
-rownames(omega_sd_unfiltered)=ADE_names
-omega_sd_unfiltered[omega_sd_unfiltered==Inf] <- 0
-omega_sd_unfiltered[omega_sd_unfiltered==-Inf] <- 0
-
-omega_col=rep(0,ncol(omega_sd_unfiltered))
-omega_row=rep(0,nrow(omega_sd_unfiltered))
-
-for(m in 1:ncol(omega_sd_unfiltered))
-{
-  omega_col[m]=sum(omega_sd_unfiltered[,m])
-}
-
-for(n in 1:nrow(omega_sd_unfiltered))
-{
-  omega_row[n]=sum(omega_sd_unfiltered[n,])
-}
-
-omega_sd=omega_sd_unfiltered[omega_row!=0,omega_col!=0]
-dim(omega_sd)
-
-write.csv(omega_sd,"omega_sd.csv")
 
 ############################omega_025############################
 
@@ -299,20 +303,72 @@ write.csv(omega_025,"omega_025.csv")
 
 setwd("C:/Users/zha200/Documents/Data/Graph")
 
-############################Unfiltered############################
+#########################test_unfilterd#########################
 
 library(gplots)
 colfunc <- colorRampPalette(c("white","grey","black"))
 
-jpeg("test_unfiltered.jpg", width=18, height=24, units="in", res=1000)
-res <- heatmap.2(omega,col=colfunc,scale="column",main="",trace="none",cexCol=1.5,cexRow=0.1,margins=c(30,30))
+pairs.breaks <- c(seq(-7, 0, length.out=50),seq(0, 9.2,length.out=50))
+mycol <- colorpanel(n=99,low="green",mid="black",high="red")
+
+heatmap.2(heatdata, breaks=pairs.breaks, col=mycol)
+
+jpeg("test.jpg", width=18, height=24, units="in", res=1000)
+res <- heatmap.2(omega_0,col=colfunc,scale="column",main="",trace="none",cexCol=1.5,cexRow=0.1,margins=c(30,30))
 dev.off()
 
-Order_M=omega[,(res$colInd)]
-##Order_M=omega[(res$rowInd),(res$colInd)]
-write.csv(Order_M,"Order_Result_unfiltered.csv")
+Order_M=omega_0[,(res$colInd)]
+##Order_M=omega_0[(res$rowInd),(res$colInd)]
+write.csv(Order_M,"Order_Result_test.csv")
 
-#################################################################
+#########################test_newformat#########################
+
+library(gplots)
+
+pairs.breaks <- c(seq(-10, -1,length.out = 2),seq(1, 10,length.out=2))
+##length(pairs.breaks)
+colfunc<- colorpanel(n=3,low="green",mid="white",high="red")
+
+jpeg("test_new.jpg", width=18, height=24, units="in", res=1000)
+res <- heatmap.2(omega_0,breaks=pairs.breaks,col=colfunc,main="",trace="none",cexCol=1.5,cexRow=0.1,margins=c(30,30))
+dev.off()
+
+Order_M=omega_0[,(res$colInd)]
+write.csv(Order_M,"Order_Result_test.csv")
+
+###########################|omega_0|>1###########################
+
+thres_ADE_freq=c(1000,5000,10000,50000)
+thres_omega_0_1=c(0,5,10,15)
+
+for(i in 1:4)
+{
+  temp_omega=omega_0[ADE_all[rownames(omega_0)]>thres_ADE_freq[i],]
+  temp_name=paste("fig_omega_0_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+  pairs.breaks <- c(seq(-10, -1,length.out=2),seq(1, 10,length.out=2))
+  colfunc<-colorpanel(n=3,low="green",mid="white",high="red")
+  jpeg(temp_name, width=18, height=24, units="in", res=1000)
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,main="",trace="none",cexCol=1.5,cexRow=0.1,margins=c(30,30))
+  dev.off()
+  Order_M=omega_0[,(res$colInd)]
+  write.csv(Order_M,order_result_name)
+
+  temp_omega=omega_0[(rowSums(abs(omega_0)>1))>thres_omega_0_1[i],]  
+  temp_name=paste("fig_omega_0_1_",thres_omega_0_1[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_0_1_",thres_omega_0_1[i],".csv",sep="")
+  pairs.breaks <- c(seq(-10, -1,length.out=2),seq(1, 10,length.out=2))
+  colfunc<- colorpanel(n=3,low="green",mid="white",high="red")
+  jpeg(temp_name, width=18, height=24, units="in", res=1000)
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,main="",trace="none",cexCol=1.5,cexRow=0.1,margins=c(30,30))
+  dev.off()
+  Order_M=omega_0[,(res$colInd)]
+  write.csv(Order_M,order_result_name)  
+  
+  cat("iter=",i,"\n")
+}
+
+############################|omega|>1############################
 
 thres_ADE_freq=c(1000,5000,10000,50000)
 thres_omega_1=c(0,5,10,15)
@@ -320,24 +376,58 @@ thres_omega_1=c(0,5,10,15)
 for(i in 1:4)
 {
   temp_omega=omega[ADE_all[rownames(omega)]>thres_ADE_freq[i],]
-  temp_name=paste("fig_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+  temp_name=paste("fig_omega_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
   order_result_name=paste("Order_Result_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
-  colfunc <- colorRampPalette(c("white","grey","black"))
+  pairs.breaks <- c(seq(-10, -1,length.out=2),seq(1, 10,length.out=2))
+  colfunc<- colorpanel(n=3,low="green",mid="white",high="red")
   jpeg(temp_name, width=18, height=24, units="in", res=1000)
-  res <- heatmap.2(temp_omega,col=colfunc,scale="column",main="",trace="none",cexCol=1.5,cexRow=0.1,margins=c(30,30))
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,main="",trace="none",cexCol=1.5,cexRow=0.1,margins=c(30,30))
   dev.off()
   Order_M=omega[,(res$colInd)]
   write.csv(Order_M,order_result_name)
-
-  temp_omega=omega[(rowSums(abs(omega)>1))>thres_omega_1[i],]
+  
+  temp_omega=omega[(rowSums(abs(omega)>1))>thres_omega_1[i],]  
   temp_name=paste("fig_omega_1_",thres_omega_1[i],".jpeg",sep="")
   order_result_name=paste("Order_Result_omega_1_",thres_omega_1[i],".csv",sep="")
-  colfunc <- colorRampPalette(c("white","grey","black"))
+  pairs.breaks <- c(seq(-10, -1,length.out=2),seq(1, 10,length.out=2))
+  colfunc<- colorpanel(n=3,low="green",mid="white",high="red")
   jpeg(temp_name, width=18, height=24, units="in", res=1000)
-  res <- heatmap.2(temp_omega,col=colfunc,scale="column",main="",trace="none",cexCol=1.5,cexRow=0.1,margins=c(30,30))
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,main="",trace="none",cexCol=1.5,cexRow=0.1,margins=c(30,30))
   dev.off()
   Order_M=omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)  
+  
+  cat("iter=",i,"\n")
+}
+
+##########################|omega_025|>1##########################
+
+thres_ADE_freq=c(1000,5000,10000,50000)
+thres_omega_025_1=c(0,5,10,15)
+
+for(i in 1:4)
+{
+  temp_omega=omega_025[ADE_all[rownames(omega_025)]>thres_ADE_freq[i],]
+  temp_name=paste("fig_omega_025_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+  pairs.breaks <- c(seq(-10, -1,length.out=2),seq(1, 10,length.out=2))
+  colfunc<- colorpanel(n=3,low="green",mid="white",high="red")
+  jpeg(temp_name, width=18, height=24, units="in", res=1000)
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,main="",trace="none",cexCol=1.5,cexRow=0.1,margins=c(30,30))
+  dev.off()
+  Order_M=omega_025[,(res$colInd)]
   write.csv(Order_M,order_result_name)
+  
+  temp_omega=omega_025[(rowSums(abs(omega_025)>1))>thres_omega_025_1[i],]  
+  temp_name=paste("fig_omega_025_1_",thres_omega_025_1[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_025_1_",thres_omega_025_1[i],".csv",sep="")
+  pairs.breaks <- c(seq(-10, -1,length.out=2),seq(1, 10,length.out=2))
+  colfunc<- colorpanel(n=3,low="green",mid="white",high="red")
+  jpeg(temp_name, width=18, height=24, units="in", res=1000)
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,main="",trace="none",cexCol=1.5,cexRow=0.1,margins=c(30,30))
+  dev.off()
+  Order_M=omega_025[,(res$colInd)]
+  write.csv(Order_M,order_result_name)  
   
   cat("iter=",i,"\n")
 }
