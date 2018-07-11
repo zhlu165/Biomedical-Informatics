@@ -302,132 +302,1545 @@ write.csv(omega_025,"omega_025.csv")
 ###############################Plot###############################
 
 setwd("C:/Users/zha200/Documents/Data/Graph")
-
-#########################test_unfilterd#########################
-
 library(gplots)
-colfunc <- colorRampPalette(c("white","grey","black"))
+library(RColorBrewer)
+library(randomcoloR)
 
-pairs.breaks <- c(seq(-7, 0, length.out=50),seq(0, 9.2,length.out=50))
-mycol <- colorpanel(n=99,low="green",mid="black",high="red")
+#########################test_unfiltered#########################
 
-heatmap.2(heatdata, breaks=pairs.breaks, col=mycol)
-
-jpeg("test.jpg", width=18, height=24, units="in", res=1000)
-res <- heatmap.2(omega_0,col=colfunc,scale="column",main="",trace="none",cexCol=1.5,cexRow=0.1,margins=c(30,30))
-dev.off()
-
-Order_M=omega_0[,(res$colInd)]
-##Order_M=omega_0[(res$rowInd),(res$colInd)]
-write.csv(Order_M,"Order_Result_test.csv")
-
-#########################test_newformat#########################
-
-library(gplots)
-
-pairs.breaks <- c(seq(-10, -1,length.out = 2),seq(1, 10,length.out=2))
+pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(1,15,length.out=2))
 ##length(pairs.breaks)
-colfunc<- colorpanel(n=3,low="green",mid="white",high="red")
+colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
 
-jpeg("test_new.jpg", width=18, height=24, units="in", res=1000)
-res <- heatmap.2(omega_0,breaks=pairs.breaks,col=colfunc,main="",trace="none",cexCol=1.5,cexRow=0.1,margins=c(30,30))
+jpeg("test.jpg", width=16, height=30, units="in", res=1000)
+hc <- hclust(dist(omega_0))
+groups <- cutree(hc, k=100) 
+rc <- brewer.pal(12, "Paired")
+rc <- colorRampPalette(rc)(100)
+test_col_name=colnames(omega_0[,colSums(omega_0>1)>0])
+test_row_name=rownames(omega_0[rowSums(omega_0>1)>0,])
+res <- heatmap.2(omega_0,breaks=pairs.breaks,col=colfunc,
+                 RowSideColors=rc[groups], srtCol=45,
+                 main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                 cexCol=1,cexRow=0.1,
+                 margins=c(15,6),keysize=0.5,
+                 labRow=test_row_name,labCol=test_col_name)
 dev.off()
 
 Order_M=omega_0[,(res$colInd)]
 write.csv(Order_M,"Order_Result_test.csv")
 
-###########################|omega_0|>1###########################
+#################Another method to assign colors#################
 
-thres_ADE_freq=c(1000,5000,10000,50000)
-thres_omega_0_1=c(0,5,10,15)
+# pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(1, 15,length.out=2))
+# ##length(pairs.breaks)
+# colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+# 
+# jpeg("test.jpg", width=18, height=24, units="in", res=1000)
+# hc <- hclust(dist(omega_0))
+# groups <- cutree(hc, k=15) 
+# rc <- distinctColorPalette(15)
+# res <- heatmap.2(omega_0,breaks=pairs.breaks,col=colfunc,
+#                  RowSideColors=rc[groups],
+#                  main="",trace="none",cexCol=1.5,cexRow=0.1,margins=c(30,30))
+# dev.off()
+# 
+# Order_M=omega_0[,(res$colInd)]
+# write.csv(Order_M,"Order_Result_test.csv")
 
-for(i in 1:4)
+############################|omega_0|############################
+############################|omega_0|############################
+############################|omega_0|############################
+
+###############################d>1###############################
+
+f=1
+d=1
+setwd("/Users/Lulu/Documents/Intern/Graph/omega_0")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
 {
   temp_omega=omega_0[ADE_all[rownames(omega_0)]>thres_ADE_freq[i],]
-  temp_name=paste("fig_omega_0_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
-  order_result_name=paste("Order_Result_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
-  pairs.breaks <- c(seq(-10, -1,length.out=2),seq(1, 10,length.out=2))
-  colfunc<-colorpanel(n=3,low="green",mid="white",high="red")
-  jpeg(temp_name, width=18, height=24, units="in", res=1000)
-  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,main="",trace="none",cexCol=1.5,cexRow=0.1,margins=c(30,30))
+  temp_name=paste("fig_omega_0_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_0_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=44)
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(44)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
   dev.off()
-  Order_M=omega_0[,(res$colInd)]
+  Order_M=temp_omega[,(res$colInd)]
   write.csv(Order_M,order_result_name)
 
-  temp_omega=omega_0[(rowSums(abs(omega_0)>1))>thres_omega_0_1[i],]  
-  temp_name=paste("fig_omega_0_1_",thres_omega_0_1[i],".jpeg",sep="")
-  order_result_name=paste("Order_Result_omega_0_1_",thres_omega_0_1[i],".csv",sep="")
-  pairs.breaks <- c(seq(-10, -1,length.out=2),seq(1, 10,length.out=2))
-  colfunc<- colorpanel(n=3,low="green",mid="white",high="red")
-  jpeg(temp_name, width=18, height=24, units="in", res=1000)
-  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,main="",trace="none",cexCol=1.5,cexRow=0.1,margins=c(30,30))
+  temp_omega=omega_0[(rowSums(omega_0>f))>thres_omega[i],]
+  temp_name=paste("fig_omega_0_f",f,"_d",d,"_",thres_omega[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_0_f",f,"_d",d,"_",thres_omega[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=44) 
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(44)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
   dev.off()
-  Order_M=omega_0[,(res$colInd)]
+  Order_M=temp_omega[,(res$colInd)]
   write.csv(Order_M,order_result_name)  
   
   cat("iter=",i,"\n")
 }
 
-############################|omega|>1############################
+###############################d>1.5###############################
 
-thres_ADE_freq=c(1000,5000,10000,50000)
-thres_omega_1=c(0,5,10,15)
+f=1
+d=1.5
+setwd("/Users/Lulu/Documents/Intern/Graph/omega_0")
 
-for(i in 1:4)
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega_0[ADE_all[rownames(omega_0)]>thres_ADE_freq[i],]
+  temp_name=paste("fig_omega_0_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_0_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=44)
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(44)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)
+  
+  temp_omega=omega_0[(rowSums(omega_0>f))>thres_omega[i],]
+  temp_name=paste("fig_omega_0_f",f,"_d",d,"_",thres_omega[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_0_f",f,"_d",d,"_",thres_omega[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=44) 
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(44)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)  
+  
+  cat("iter=",i,"\n")
+}
+
+###############################d>2###############################
+
+f=1
+d=2
+setwd("/Users/Lulu/Documents/Intern/Graph/omega_0")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega_0[ADE_all[rownames(omega_0)]>thres_ADE_freq[i],]
+  temp_name=paste("fig_omega_0_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_0_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=44)
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(44)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)
+  
+  temp_omega=omega_0[(rowSums(omega_0>f))>thres_omega[i],]
+  temp_name=paste("fig_omega_0_f",f,"_d",d,"_",thres_omega[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_0_f",f,"_d",d,"_",thres_omega[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=44) 
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(44)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)  
+  
+  cat("iter=",i,"\n")
+}
+
+###############################d>2.5###############################
+
+f=1
+d=2.5
+setwd("/Users/Lulu/Documents/Intern/Graph/omega_0")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega_0[ADE_all[rownames(omega_0)]>thres_ADE_freq[i],]
+  temp_name=paste("fig_omega_0_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_0_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega)) 
+  groups <- cutree(hc, k=44)
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(44)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)
+  
+  temp_omega=omega_0[(rowSums(omega_0>f))>thres_omega[i],]
+  temp_name=paste("fig_omega_0_f",f,"_d",d,"_",thres_omega[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_0_f",f,"_d",d,"_",thres_omega[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=44) 
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(44)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)  
+  
+  cat("iter=",i,"\n")
+}
+
+###############################d>3###############################
+
+f=1
+d=3
+setwd("/Users/Lulu/Documents/Intern/Graph/omega_0")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega_0[ADE_all[rownames(omega_0)]>thres_ADE_freq[i],]
+  temp_name=paste("fig_omega_0_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_0_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=44)
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(44)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups],srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)
+  
+  temp_omega=omega_0[(rowSums(omega_0>f))>thres_omega[i],]
+  temp_name=paste("fig_omega_0_f",f,"_d",d,"_",thres_omega[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_0_f",f,"_d",d,"_",thres_omega[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=44) 
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(44)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups],srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)  
+  
+  cat("iter=",i,"\n")
+}
+
+############################Combo d>1############################
+
+f=1
+d=1
+setwd("/Users/Lulu/Documents/Intern/Graph/omega_0")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega_0[ADE_all[rownames(omega_0)]>thres_ADE_freq[i],]
+  for(j in 1:11)
+  {
+    temp_omega=temp_omega[(rowSums(temp_omega>f))>thres_omega[j],]
+    temp_name=paste("fig_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+    order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+    
+    pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+    colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+    jpeg(temp_name, width=16, height=30, units="in", res=1000)
+    hc <- hclust(dist(temp_omega))
+    groups <- cutree(hc, k=2)
+    rc <- brewer.pal(12, "Paired")
+    rc <- colorRampPalette(rc)(2)
+    test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+    test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+    res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                     RowSideColors=rc[groups], srtCol=45,
+                     main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                     cexCol=1,cexRow=0.1,
+                     margins=c(15,6),keysize=0.5,
+                     labRow=test_row_name,labCol=test_col_name)
+    dev.off()
+    Order_M=temp_omega[,(res$colInd)]
+    write.csv(Order_M,order_result_name)
+    
+    cat("iter=",i,"-",j,"\n")
+  }
+}
+
+############################Combo d>1.5############################
+
+f=1
+d=1.5
+setwd("/Users/Lulu/Documents/Intern/Graph/omega_0")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega_0[ADE_all[rownames(omega_0)]>thres_ADE_freq[i],]
+  for(j in 1:11)
+  {
+    temp_omega=temp_omega[(rowSums(temp_omega>f))>thres_omega[j],]
+    temp_name=paste("fig_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+    order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+    
+    pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+    colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+    jpeg(temp_name, width=16, height=30, units="in", res=1000)
+    hc <- hclust(dist(temp_omega))
+    groups <- cutree(hc, k=2)
+    rc <- brewer.pal(12, "Paired")
+    rc <- colorRampPalette(rc)(2)
+    test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+    test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+    res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                     RowSideColors=rc[groups], srtCol=45,
+                     main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                     cexCol=1,cexRow=0.1,
+                     margins=c(15,6),keysize=0.5,
+                     labRow=test_row_name,labCol=test_col_name)
+    dev.off()
+    Order_M=temp_omega[,(res$colInd)]
+    write.csv(Order_M,order_result_name)
+    
+    cat("iter=",i,"-",j,"\n")
+  }
+}
+
+############################Combo d>2############################
+
+f=1
+d=2
+setwd("/Users/Lulu/Documents/Intern/Graph/omega_0")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega_0[ADE_all[rownames(omega_0)]>thres_ADE_freq[i],]
+  for(j in 1:11)
+  {
+    temp_omega=temp_omega[(rowSums(temp_omega>f))>thres_omega[j],]
+    temp_name=paste("fig_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+    order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+    
+    pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+    colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+    jpeg(temp_name, width=16, height=30, units="in", res=1000)
+    hc <- hclust(dist(temp_omega))
+    groups <- cutree(hc, k=2)
+    rc <- brewer.pal(12, "Paired")
+    rc <- colorRampPalette(rc)(2)
+    test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+    test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+    res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                     RowSideColors=rc[groups], srtCol=45,
+                     main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                     cexCol=1,cexRow=0.1,
+                     margins=c(15,6),keysize=0.5,
+                     labRow=test_row_name,labCol=test_col_name)
+    dev.off()
+    Order_M=temp_omega[,(res$colInd)]
+    write.csv(Order_M,order_result_name)
+    
+    cat("iter=",i,"-",j,"\n")
+  }
+}
+
+############################Combo d>2.5############################
+
+f=1
+d=2.5
+setwd("/Users/Lulu/Documents/Intern/Graph/omega_0")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega_0[ADE_all[rownames(omega_0)]>thres_ADE_freq[i],]
+  for(j in 1:11)
+  {
+    temp_omega=temp_omega[(rowSums(temp_omega>f))>thres_omega[j],]
+    temp_name=paste("fig_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+    order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+    
+    pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+    colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+    jpeg(temp_name, width=16, height=30, units="in", res=1000)
+    hc <- hclust(dist(temp_omega))
+    groups <- cutree(hc, k=2)
+    rc <- brewer.pal(12, "Paired")
+    rc <- colorRampPalette(rc)(2)
+    test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+    test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+    res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                     RowSideColors=rc[groups], srtCol=45,
+                     main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                     cexCol=1,cexRow=0.1,
+                     margins=c(15,6),keysize=0.5,
+                     labRow=test_row_name,labCol=test_col_name)
+    dev.off()
+    Order_M=temp_omega[,(res$colInd)]
+    write.csv(Order_M,order_result_name)
+    
+    cat("iter=",i,"-",j,"\n")
+  }
+}
+
+############################Combo d>3############################
+
+f=1
+d=3
+setwd("/Users/Lulu/Documents/Intern/Graph/omega_0")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega_0[ADE_all[rownames(omega_0)]>thres_ADE_freq[i],]
+  for(j in 1:11)
+  {
+    temp_omega=temp_omega[(rowSums(temp_omega>f))>thres_omega[j],]
+    temp_name=paste("fig_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+    order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+    
+    pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+    colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+    jpeg(temp_name, width=16, height=30, units="in", res=1000)
+    hc <- hclust(dist(temp_omega))
+    groups <- cutree(hc, k=2)
+    rc <- brewer.pal(12, "Paired")
+    rc <- colorRampPalette(rc)(2)
+    test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+    test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+    res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                     RowSideColors=rc[groups], srtCol=45,
+                     main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                     cexCol=1,cexRow=0.1,
+                     margins=c(15,6),keysize=0.5,
+                     labRow=test_row_name,labCol=test_col_name)
+    dev.off()
+    Order_M=temp_omega[,(res$colInd)]
+    write.csv(Order_M,order_result_name)
+    
+    cat("iter=",i,"-",j,"\n")
+  }
+}
+
+#############################|omega|#############################
+#############################|omega|#############################
+#############################|omega|#############################
+
+###############################d>1###############################
+
+f=1
+d=1
+setwd("/Users/Lulu/Documents/Intern/Graph/omega")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
 {
   temp_omega=omega[ADE_all[rownames(omega)]>thres_ADE_freq[i],]
-  temp_name=paste("fig_omega_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
-  order_result_name=paste("Order_Result_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
-  pairs.breaks <- c(seq(-10, -1,length.out=2),seq(1, 10,length.out=2))
-  colfunc<- colorpanel(n=3,low="green",mid="white",high="red")
-  jpeg(temp_name, width=18, height=24, units="in", res=1000)
-  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,main="",trace="none",cexCol=1.5,cexRow=0.1,margins=c(30,30))
+  temp_name=paste("fig_omega_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=44)
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(44)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
   dev.off()
-  Order_M=omega[,(res$colInd)]
+  Order_M=temp_omega[,(res$colInd)]
   write.csv(Order_M,order_result_name)
   
-  temp_omega=omega[(rowSums(abs(omega)>1))>thres_omega_1[i],]  
-  temp_name=paste("fig_omega_1_",thres_omega_1[i],".jpeg",sep="")
-  order_result_name=paste("Order_Result_omega_1_",thres_omega_1[i],".csv",sep="")
-  pairs.breaks <- c(seq(-10, -1,length.out=2),seq(1, 10,length.out=2))
-  colfunc<- colorpanel(n=3,low="green",mid="white",high="red")
-  jpeg(temp_name, width=18, height=24, units="in", res=1000)
-  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,main="",trace="none",cexCol=1.5,cexRow=0.1,margins=c(30,30))
+  temp_omega=omega[(rowSums(omega>f))>thres_omega[i],]
+  temp_name=paste("fig_omega_f",f,"_d",d,"_",thres_omega[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_",thres_omega[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=44) 
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(44)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
   dev.off()
-  Order_M=omega[,(res$colInd)]
+  Order_M=temp_omega[,(res$colInd)]
   write.csv(Order_M,order_result_name)  
   
   cat("iter=",i,"\n")
 }
 
-##########################|omega_025|>1##########################
+###############################d>1.5###############################
 
-thres_ADE_freq=c(1000,5000,10000,50000)
-thres_omega_025_1=c(0,5,10,15)
+f=1
+d=1.5
+setwd("/Users/Lulu/Documents/Intern/Graph/omega")
 
-for(i in 1:4)
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
 {
-  temp_omega=omega_025[ADE_all[rownames(omega_025)]>thres_ADE_freq[i],]
-  temp_name=paste("fig_omega_025_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
-  order_result_name=paste("Order_Result_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
-  pairs.breaks <- c(seq(-10, -1,length.out=2),seq(1, 10,length.out=2))
-  colfunc<- colorpanel(n=3,low="green",mid="white",high="red")
-  jpeg(temp_name, width=18, height=24, units="in", res=1000)
-  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,main="",trace="none",cexCol=1.5,cexRow=0.1,margins=c(30,30))
+  temp_omega=omega[ADE_all[rownames(omega)]>thres_ADE_freq[i],]
+  temp_name=paste("fig_omega_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=44)
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(44)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
   dev.off()
-  Order_M=omega_025[,(res$colInd)]
+  Order_M=temp_omega[,(res$colInd)]
   write.csv(Order_M,order_result_name)
   
-  temp_omega=omega_025[(rowSums(abs(omega_025)>1))>thres_omega_025_1[i],]  
-  temp_name=paste("fig_omega_025_1_",thres_omega_025_1[i],".jpeg",sep="")
-  order_result_name=paste("Order_Result_omega_025_1_",thres_omega_025_1[i],".csv",sep="")
-  pairs.breaks <- c(seq(-10, -1,length.out=2),seq(1, 10,length.out=2))
-  colfunc<- colorpanel(n=3,low="green",mid="white",high="red")
-  jpeg(temp_name, width=18, height=24, units="in", res=1000)
-  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,main="",trace="none",cexCol=1.5,cexRow=0.1,margins=c(30,30))
+  temp_omega=omega[(rowSums(omega>f))>thres_omega[i],]
+  temp_name=paste("fig_omega_f",f,"_d",d,"_",thres_omega[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_",thres_omega[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=44) 
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(44)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
   dev.off()
-  Order_M=omega_025[,(res$colInd)]
+  Order_M=temp_omega[,(res$colInd)]
   write.csv(Order_M,order_result_name)  
   
   cat("iter=",i,"\n")
+}
+
+###############################d>2###############################
+
+f=1
+d=2
+setwd("/Users/Lulu/Documents/Intern/Graph/omega")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega[ADE_all[rownames(omega)]>thres_ADE_freq[i],]
+  temp_name=paste("fig_omega_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=44)
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(44)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)
+  
+  temp_omega=omega[(rowSums(omega>f))>thres_omega[i],]
+  temp_name=paste("fig_omega_f",f,"_d",d,"_",thres_omega[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_",thres_omega[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=44) 
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(44)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)  
+  
+  cat("iter=",i,"\n")
+}
+
+###############################d>2.5###############################
+
+f=1
+d=2.5
+setwd("/Users/Lulu/Documents/Intern/Graph/omega")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega[ADE_all[rownames(omega)]>thres_ADE_freq[i],]
+  temp_name=paste("fig_omega_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=44)
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(44)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)
+  
+  temp_omega=omega[(rowSums(omega>f))>thres_omega[i],]
+  temp_name=paste("fig_omega_f",f,"_d",d,"_",thres_omega[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_",thres_omega[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=44) 
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(44)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)  
+  
+  cat("iter=",i,"\n")
+}
+
+###############################d>3###############################
+
+f=1
+d=3
+setwd("/Users/Lulu/Documents/Intern/Graph/omega")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega[ADE_all[rownames(omega)]>thres_ADE_freq[i],]
+  temp_name=paste("fig_omega_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=44)
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(44)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)
+  
+  temp_omega=omega[(rowSums(omega>f))>thres_omega[i],]
+  temp_name=paste("fig_omega_f",f,"_d",d,"_",thres_omega[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_",thres_omega[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=44) 
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(44)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)  
+  
+  cat("iter=",i,"\n")
+}
+
+############################Combo d>1############################
+
+f=1
+d=1
+setwd("/Users/Lulu/Documents/Intern/Graph/omega")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega[ADE_all[rownames(omega)]>thres_ADE_freq[i],]
+  for(j in 1:11)
+  {
+    temp_omega=temp_omega[(rowSums(temp_omega>f))>thres_omega[j],]
+    temp_name=paste("fig_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+    order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+    
+    pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+    colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+    jpeg(temp_name, width=16, height=30, units="in", res=1000)
+    hc <- hclust(dist(temp_omega))
+    groups <- cutree(hc, k=2)
+    rc <- brewer.pal(12, "Paired")
+    rc <- colorRampPalette(rc)(2)
+    test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+    test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+    res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                     RowSideColors=rc[groups], srtCol=45,
+                     main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                     cexCol=1,cexRow=0.1,
+                     margins=c(15,6),keysize=0.5,
+                     labRow=test_row_name,labCol=test_col_name)
+    dev.off()
+    Order_M=temp_omega[,(res$colInd)]
+    write.csv(Order_M,order_result_name)
+    
+    cat("iter=",i,"-",j,"\n")
+  }
+}
+
+###########################Combo d>1.5###########################
+
+f=1
+d=1.5
+setwd("/Users/Lulu/Documents/Intern/Graph/omega")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega[ADE_all[rownames(omega)]>thres_ADE_freq[i],]
+  for(j in 1:11)
+  {
+    temp_omega=temp_omega[(rowSums(temp_omega>f))>thres_omega[j],]
+    temp_name=paste("fig_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+    order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+    
+    pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+    colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+    jpeg(temp_name, width=16, height=30, units="in", res=1000)
+    hc <- hclust(dist(temp_omega))
+    groups <- cutree(hc, k=2)
+    rc <- brewer.pal(12, "Paired")
+    rc <- colorRampPalette(rc)(2)
+    test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+    test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+    res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                     RowSideColors=rc[groups], srtCol=45,
+                     main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                     cexCol=1,cexRow=0.1,
+                     margins=c(15,6),keysize=0.5,
+                     labRow=test_row_name,labCol=test_col_name)
+    dev.off()
+    Order_M=temp_omega[,(res$colInd)]
+    write.csv(Order_M,order_result_name)
+    
+    cat("iter=",i,"-",j,"\n")
+  }
+}
+
+############################Combo d>2############################
+
+f=1
+d=2
+setwd("/Users/Lulu/Documents/Intern/Graph/omega")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega[ADE_all[rownames(omega)]>thres_ADE_freq[i],]
+  for(j in 1:11)
+  {
+    temp_omega=temp_omega[(rowSums(temp_omega>f))>thres_omega[j],]
+    temp_name=paste("fig_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+    order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+    
+    pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+    colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+    jpeg(temp_name, width=16, height=30, units="in", res=1000)
+    hc <- hclust(dist(temp_omega))
+    groups <- cutree(hc, k=2)
+    rc <- brewer.pal(12, "Paired")
+    rc <- colorRampPalette(rc)(2)
+    test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+    test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+    res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                     RowSideColors=rc[groups], srtCol=45,
+                     main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                     cexCol=1,cexRow=0.1,
+                     margins=c(15,6),keysize=0.5,
+                     labRow=test_row_name,labCol=test_col_name)
+    dev.off()
+    Order_M=temp_omega[,(res$colInd)]
+    write.csv(Order_M,order_result_name)
+    
+    cat("iter=",i,"-",j,"\n")
+  }
+}
+
+###########################Combo d>2.5###########################
+
+f=1
+d=2.5
+setwd("/Users/Lulu/Documents/Intern/Graph/omega")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega[ADE_all[rownames(omega)]>thres_ADE_freq[i],]
+  for(j in 1:11)
+  {
+    temp_omega=temp_omega[(rowSums(temp_omega>f))>thres_omega[j],]
+    temp_name=paste("fig_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+    order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+    
+    pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+    colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+    jpeg(temp_name, width=16, height=30, units="in", res=1000)
+    hc <- hclust(dist(temp_omega))
+    groups <- cutree(hc, k=2)
+    rc <- brewer.pal(12, "Paired")
+    rc <- colorRampPalette(rc)(2)
+    test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+    test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+    res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                     RowSideColors=rc[groups], srtCol=45,
+                     main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                     cexCol=1,cexRow=0.1,
+                     margins=c(15,6),keysize=0.5,
+                     labRow=test_row_name,labCol=test_col_name)
+    dev.off()
+    Order_M=temp_omega[,(res$colInd)]
+    write.csv(Order_M,order_result_name)
+    
+    cat("iter=",i,"-",j,"\n")
+  }
+}
+
+############################Combo d>3############################
+
+f=1
+d=3
+setwd("/Users/Lulu/Documents/Intern/Graph/omega")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega[ADE_all[rownames(omega)]>thres_ADE_freq[i],]
+  for(j in 1:11)
+  {
+    temp_omega=temp_omega[(rowSums(temp_omega>f))>thres_omega[j],]
+    temp_name=paste("fig_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+    order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+    
+    pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+    colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+    jpeg(temp_name, width=16, height=30, units="in", res=1000)
+    hc <- hclust(dist(temp_omega))
+    groups <- cutree(hc, k=2)
+    rc <- brewer.pal(12, "Paired")
+    rc <- colorRampPalette(rc)(2)
+    test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+    test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+    res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                     RowSideColors=rc[groups], srtCol=45,
+                     main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                     cexCol=1,cexRow=0.1,
+                     margins=c(15,6),keysize=0.5,
+                     labRow=test_row_name,labCol=test_col_name)
+    dev.off()
+    Order_M=temp_omega[,(res$colInd)]
+    write.csv(Order_M,order_result_name)
+    
+    cat("iter=",i,"-",j,"\n")
+  }
+}
+
+###########################|omega_025|###########################
+###########################|omega_025|###########################
+###########################|omega_025|###########################
+
+###############################d>1###############################
+
+f=1
+d=1
+setwd("/Users/Lulu/Documents/Intern/Graph/omega_025")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega_025[ADE_all[rownames(omega_025)]>thres_ADE_freq[i],]
+  temp_name=paste("fig_omega_025_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_025_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=19)
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(19)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)
+  
+  temp_omega=omega_025[(rowSums(omega_025>f))>thres_omega[i],]
+  temp_name=paste("fig_omega_025_f",f,"_d",d,"_",thres_omega[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_025_f",f,"_d",d,"_",thres_omega[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=19) 
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(19)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)  
+  
+  cat("iter=",i,"\n")
+}
+
+###############################d>1.5###############################
+
+f=1
+d=1.5
+setwd("/Users/Lulu/Documents/Intern/Graph/omega_025")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega_025[ADE_all[rownames(omega_025)]>thres_ADE_freq[i],]
+  temp_name=paste("fig_omega_025_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_025_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=19)
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(19)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)
+  
+  temp_omega=omega_025[(rowSums(omega_025>f))>thres_omega[i],]
+  temp_name=paste("fig_omega_025_f",f,"_d",d,"_",thres_omega[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_025_f",f,"_d",d,"_",thres_omega[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=19) 
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(19)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)  
+  
+  cat("iter=",i,"\n")
+}
+
+###############################d>2###############################
+
+f=1
+d=2
+setwd("/Users/Lulu/Documents/Intern/Graph/omega_025")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega_025[ADE_all[rownames(omega_025)]>thres_ADE_freq[i],]
+  temp_name=paste("fig_omega_025_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_025_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=19)
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(19)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)
+  
+  temp_omega=omega_025[(rowSums(omega_025>f))>thres_omega[i],]
+  temp_name=paste("fig_omega_025_f",f,"_d",d,"_",thres_omega[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_025_f",f,"_d",d,"_",thres_omega[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=19) 
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(19)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)  
+  
+  cat("iter=",i,"\n")
+}
+
+###############################d>2.5###############################
+
+f=1
+d=2.5
+setwd("/Users/Lulu/Documents/Intern/Graph/omega_025")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega_025[ADE_all[rownames(omega_025)]>thres_ADE_freq[i],]
+  temp_name=paste("fig_omega_025_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_025_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=19)
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(19)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)
+  
+  temp_omega=omega_025[(rowSums(omega_025>f))>thres_omega[i],]
+  temp_name=paste("fig_omega_025_f",f,"_d",d,"_",thres_omega[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_025_f",f,"_d",d,"_",thres_omega[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=19) 
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(19)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)  
+  
+  cat("iter=",i,"\n")
+}
+
+###############################d>3###############################
+
+f=1
+d=3
+setwd("/Users/Lulu/Documents/Intern/Graph/omega_025")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega_025[ADE_all[rownames(omega_025)]>thres_ADE_freq[i],]
+  temp_name=paste("fig_omega_025_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_025_f",f,"_d",d,"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=19)
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(19)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)
+  
+  temp_omega=omega_025[(rowSums(omega_025>f))>thres_omega[i],]
+  temp_name=paste("fig_omega_025_f",f,"_d",d,"_",thres_omega[i],".jpeg",sep="")
+  order_result_name=paste("Order_Result_omega_025_f",f,"_d",d,"_",thres_omega[i],".csv",sep="")
+  pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+  colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+  jpeg(temp_name, width=16, height=30, units="in", res=1000)
+  hc <- hclust(dist(temp_omega))
+  groups <- cutree(hc, k=19) 
+  rc <- brewer.pal(12, "Paired")
+  rc <- colorRampPalette(rc)(19)
+  test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+  test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+  res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                   RowSideColors=rc[groups], srtCol=45,
+                   main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                   cexCol=1,cexRow=0.1,
+                   margins=c(15,6),keysize=0.5,
+                   labRow=test_row_name,labCol=test_col_name)
+  dev.off()
+  Order_M=temp_omega[,(res$colInd)]
+  write.csv(Order_M,order_result_name)  
+  
+  cat("iter=",i,"\n")
+}
+
+############################Combo d>1############################
+
+f=1
+d=1
+setwd("/Users/Lulu/Documents/Intern/Graph/omega_025")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega_025[ADE_all[rownames(omega_025)]>thres_ADE_freq[i],]
+  for(j in 1:11)
+  {
+    temp_omega=temp_omega[(rowSums(temp_omega>f))>thres_omega[j],]
+    temp_name=paste("fig_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+    order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+    
+    pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+    colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+    jpeg(temp_name, width=16, height=30, units="in", res=1000)
+    hc <- hclust(dist(temp_omega))
+    groups <- cutree(hc, k=2)
+    rc <- brewer.pal(12, "Paired")
+    rc <- colorRampPalette(rc)(2)
+    test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+    test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+    res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                     RowSideColors=rc[groups], srtCol=45,
+                     main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                     cexCol=1,cexRow=0.1,
+                     margins=c(15,6),keysize=0.5,
+                     labRow=test_row_name,labCol=test_col_name)
+    dev.off()
+    Order_M=temp_omega[,(res$colInd)]
+    write.csv(Order_M,order_result_name)
+    
+    cat("iter=",i,"-",j,"\n")
+  }
+}
+
+############################Combo d>1.5############################
+
+f=1
+d=1.5
+setwd("/Users/Lulu/Documents/Intern/Graph/omega_025")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega_025[ADE_all[rownames(omega_025)]>thres_ADE_freq[i],]
+  for(j in 1:11)
+  {
+    temp_omega=temp_omega[(rowSums(temp_omega>f))>thres_omega[j],]
+    temp_name=paste("fig_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+    order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+    
+    pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+    colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+    jpeg(temp_name, width=16, height=30, units="in", res=1000)
+    hc <- hclust(dist(temp_omega))
+    groups <- cutree(hc, k=2)
+    rc <- brewer.pal(12, "Paired")
+    rc <- colorRampPalette(rc)(2)
+    test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+    test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+    res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                     RowSideColors=rc[groups], srtCol=45,
+                     main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                     cexCol=1,cexRow=0.1,
+                     margins=c(15,6),keysize=0.5,
+                     labRow=test_row_name,labCol=test_col_name)
+    dev.off()
+    Order_M=temp_omega[,(res$colInd)]
+    write.csv(Order_M,order_result_name)
+    
+    cat("iter=",i,"-",j,"\n")
+  }
+}
+
+############################Combo d>2############################
+
+f=1
+d=2
+setwd("/Users/Lulu/Documents/Intern/Graph/omega_025")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega_025[ADE_all[rownames(omega_025)]>thres_ADE_freq[i],]
+  for(j in 1:11)
+  {
+    temp_omega=temp_omega[(rowSums(temp_omega>f))>thres_omega[j],]
+    temp_name=paste("fig_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+    order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+    
+    pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+    colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+    jpeg(temp_name, width=16, height=30, units="in", res=1000)
+    hc <- hclust(dist(temp_omega))
+    groups <- cutree(hc, k=2)
+    rc <- brewer.pal(12, "Paired")
+    rc <- colorRampPalette(rc)(2)
+    test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+    test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+    res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                     RowSideColors=rc[groups], srtCol=45,
+                     main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                     cexCol=1,cexRow=0.1,
+                     margins=c(15,6),keysize=0.5,
+                     labRow=test_row_name,labCol=test_col_name)
+    dev.off()
+    Order_M=temp_omega[,(res$colInd)]
+    write.csv(Order_M,order_result_name)
+    
+    cat("iter=",i,"-",j,"\n")
+  }
+}
+
+############################Combo d>2.5############################
+
+f=1
+d=2.5
+setwd("/Users/Lulu/Documents/Intern/Graph/omega_025")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega_025[ADE_all[rownames(omega_025)]>thres_ADE_freq[i],]
+  for(j in 1:11)
+  {
+    temp_omega=temp_omega[(rowSums(temp_omega>f))>thres_omega[j],]
+    temp_name=paste("fig_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+    order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+    
+    pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+    colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+    jpeg(temp_name, width=16, height=30, units="in", res=1000)
+    hc <- hclust(dist(temp_omega))
+    groups <- cutree(hc, k=2)
+    rc <- brewer.pal(12, "Paired")
+    rc <- colorRampPalette(rc)(2)
+    test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+    test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+    res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                     RowSideColors=rc[groups], srtCol=45,
+                     main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                     cexCol=1,cexRow=0.1,
+                     margins=c(15,6),keysize=0.5,
+                     labRow=test_row_name,labCol=test_col_name)
+    dev.off()
+    Order_M=temp_omega[,(res$colInd)]
+    write.csv(Order_M,order_result_name)
+    
+    cat("iter=",i,"-",j,"\n")
+  }
+}
+
+############################Combo d>3############################
+
+f=1
+d=3
+setwd("/Users/Lulu/Documents/Intern/Graph/omega_025")
+
+thres_ADE_freq=c(1000,3000,5000,7000,9000,15000,20000,25000,30000,40000,50000)
+thres_omega=c(0,1,2,3,4,5,6,7,8,9,10)
+
+for(i in 1:11)
+{
+  temp_omega=omega_025[ADE_all[rownames(omega_025)]>thres_ADE_freq[i],]
+  for(j in 1:11)
+  {
+    temp_omega=temp_omega[(rowSums(temp_omega>f))>thres_omega[j],]
+    temp_name=paste("fig_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".jpeg",sep="")
+    order_result_name=paste("Order_Result_omega_f",f,"_d",d,"_",thres_omega[j],"_ADE_freq_",thres_ADE_freq[i],".csv",sep="")
+    
+    pairs.breaks <- c(seq(-15, 0,length.out = 2),seq(d,15,length.out=2))
+    colfunc<- colorpanel(n=3,low="white",mid="grey",high="black")
+    jpeg(temp_name, width=16, height=30, units="in", res=1000)
+    hc <- hclust(dist(temp_omega))
+    groups <- cutree(hc, k=2)
+    rc <- brewer.pal(12, "Paired")
+    rc <- colorRampPalette(rc)(2)
+    test_col_name=colnames(temp_omega[,colSums(temp_omega>d)>0])
+    test_row_name=rownames(temp_omega[rowSums(temp_omega>d)>0,])
+    res <- heatmap.2(temp_omega,breaks=pairs.breaks,col=colfunc,
+                     RowSideColors=rc[groups], srtCol=45,
+                     main="",xlab="Drug Pairs",ylab="ADE",trace="none",
+                     cexCol=1,cexRow=0.1,
+                     margins=c(15,6),keysize=0.5,
+                     labRow=test_row_name,labCol=test_col_name)
+    dev.off()
+    Order_M=temp_omega[,(res$colInd)]
+    write.csv(Order_M,order_result_name)
+    
+    cat("iter=",i,"-",j,"\n")
+  }
 }
