@@ -1,0 +1,284 @@
+setwd("C:/Users/zha200/Documents/Data")
+temp_drug_1=dget("widedrugdata.txt")
+ID_D=names(temp_drug_1)
+### ID_D
+
+temp_ADE_1=dget("wide ADE.txt")
+ID_ADE=names(temp_ADE_1)
+### ID_ADE
+
+trump=intersect(ID_D,ID_ADE)
+id_1=match(ID_D,trump)
+id_2=match(ID_ADE,trump)
+
+temp_drug=temp_drug_1[is.na(id_1)==F]
+temp_ADE=temp_ADE_1[is.na(id_2)==F]
+
+ID_D=names(temp_drug)
+ID_ADE=names(temp_ADE)
+sum(ID_D==ID_ADE)
+
+h=10508
+temp_drug[h]
+temp_ADE[h]
+
+ADE_names=unique(as.vector(unlist(temp_ADE)))
+
+Drug_dic=read.csv("name.csv")
+dic_ID=as.character(Drug_dic[,1])
+dic_names=as.character(Drug_dic[,3])
+
+##########################↑↑↑↑↑Read Data↑↑↑↑↑############################
+######################↓↓↓↓↓All Drugs + All ADE↓↓↓↓↓#######################
+
+ADE_terms_all=rep(0,43)
+drug_ADE_terms_all=matrix(0,43,1764)
+
+library(gdata)
+
+ADE_terms=read.csv("FDA MedDRA Medical Events Mapping.csv")
+ADE_terms_x=as.character(trim(ADE_terms$x))
+ADE_terms_y=as.character(trim(ADE_terms$y))
+ADE_terms_names=trim(unique(as.vector(unlist(ADE_terms_y))))
+
+for(i in 1:4077447)
+{
+  try_drug=temp_drug[[i]]
+  try_drug_name=dic_names[match(try_drug,dic_ID)]
+  y_drug=match(try_drug_name,dic_names)
+  
+  try_ADE=temp_ADE[[i]]
+  x_ADE=match(try_ADE,ADE_terms_x)
+  x_ADE[is.na(x_ADE)]=0
+  x_ADE=ADE_terms_y[x_ADE]
+  x_ADE=match(x_ADE,ADE_terms_names)
+  
+  ADE_terms_all[x_ADE]=ADE_terms_all[x_ADE]+1
+  drug_ADE_terms_all[x_ADE,y_drug]=drug_ADE_terms_all[x_ADE,y_drug]+1
+  
+  cat("iter=",i,"\n")
+}
+
+colnames(drug_ADE_terms_all)=dic_names
+write.csv(drug_ADE_terms_all,"drug_ADE_terms_all.csv",row.names=ADE_terms_names)
+
+names(ADE_terms_all)=ADE_terms_names
+write.csv(ADE_terms_all,"ADE_terms_all.csv")
+
+######################↓↓↓↓↓47 drug-drug pairs↓↓↓↓↓#######################
+
+######################↓↓↓↓↓N11D & N111↓↓↓↓↓#######################
+
+drug_1=read.csv("drug_1.csv")
+drug_2=read.csv("drug_2.csv")
+drug_pair=data.frame(drug_1,drug_2)
+drug_pair_vector=paste(drug_pair[,1],drug_pair[,2])
+N111_ADE_terms=matrix(0,43,47)
+
+for(j in 1:4077447)
+{
+  try_drug=temp_drug[[j]] 
+  try_drug_name=dic_names[match(try_drug,dic_ID)]
+  
+  a=rep(try_drug_name, length(try_drug_name))
+  b=rep(try_drug_name, each=length(try_drug_name))
+  c=paste(a,b)
+  
+  temp_drug_pair=match(c,drug_pair_vector)
+  temp_drug_pair=temp_drug_pair[!is.na(temp_drug_pair)]
+  
+  try_ADE=temp_ADE[[j]] 
+  temp_drug_ADE_terms=match(try_ADE,ADE_terms_x)
+  temp_drug_ADE_terms[is.na(temp_drug_ADE_terms)]=0
+  temp_drug_ADE_terms=ADE_terms_y[temp_drug_ADE_terms]
+  temp_drug_ADE_terms=match(temp_drug_ADE_terms,ADE_terms_names)
+  
+  N111_ADE_terms[temp_drug_ADE_terms,temp_drug_pair]=N111_ADE_terms[temp_drug_ADE_terms,temp_drug_pair]+1
+  
+  cat("iter =",j,"\n")
+}
+
+colnames(N111_ADE_terms)=drug_pair_vector
+write.csv(N111_ADE_terms,"N111_ADE_terms.csv",row.names=ADE_terms_names)
+
+######################↓↓↓↓↓N10D & N101↓↓↓↓↓#######################
+
+N101_ADE_terms=matrix(0,43,47)
+
+drug_1_vector=as.character(drug_1$x)
+drug1_index_in_all=match(drug_1_vector, dic_names)
+
+######convert drug_all from vector to matrix######
+drug_all_t=t(drug_all)
+drug_all_t_rep=drug_all_t[rep(1, times = 43), ]
+##################################################
+
+N101_ADE_terms=drug_ADE_terms_all[,drug1_index_in_all]
+N101_ADE_terms=N101_ADE_terms-N111_ADE_terms
+
+colnames(N101_ADE_terms)=drug_pair_vector
+write.csv(N101_ADE_terms,"N101_ADE_terms.csv",row.names=ADE_terms_names)
+
+######################↓↓↓↓↓N01D & N011↓↓↓↓↓#######################
+
+N011_ADE_terms=matrix(0,43,47)
+
+drug_2_vector=as.character(drug_2$y)
+drug2_index_in_all=match(drug_2_vector, dic_names)
+
+N011_ADE_terms=drug_ADE_terms_all[,drug2_index_in_all]
+N011_ADE_terms=N011_ADE_terms-N111_ADE_terms
+
+colnames(N011_ADE_terms)=drug_pair_vector
+write.csv(N011_ADE_terms,"N011_ADE_terms.csv",row.names=ADE_terms_names)
+
+######################↓↓↓↓↓N00D & N001↓↓↓↓↓#######################
+
+N001_ADE_terms=matrix(0,43,47)
+all_matrix=matrix(length(ID_D),43,47)
+
+######convert ADE_all from vector to matrix######
+ADE_terms_all_rep=replicate(47, ADE_terms_all)
+##################################################
+
+N001_ADE_terms=ADE_terms_all_rep-N011_ADE_terms-N101_ADE_terms-N111_ADE_terms
+
+colnames(N001_ADE_terms)=drug_pair_vector
+write.csv(N001_ADE_terms,"N001_ADE_terms.csv",row.names=ADE_terms_names)
+
+########################↓↓↓↓↓2 Drugs + 1 ADE↓↓↓↓↓#########################
+##############################Verification###############################
+
+firstDrug=("FLUCONAZOLE")
+secondDrug=("METHADONE")
+both=c("FLUCONAZOLE","METHADONE")
+
+drug_combo_ADE=matrix(0,4,2)
+
+ADE=("AMYOTROPHIC LATERAL SCLEROSIS")
+
+for(i in 1:4077447)
+{
+  try_drug=temp_drug[[i]]  ### drug information
+  try_drug_name=dic_names[match(try_drug,dic_ID)]
+  
+  temp_firstDrug=1-is.na(match(firstDrug,try_drug_name))
+  temp_secondDrug=1-is.na(match(secondDrug,try_drug_name))
+  temp_neither=0+(sum(is.na(match(both,try_drug_name)))==2)
+  temp_both=0+(sum(is.na(match(both,try_drug_name)))==0)
+  
+  drug_combo=matrix(0,4,2)
+  drug_combo[1,]=temp_neither
+  drug_combo[2,]=temp_firstDrug-temp_both
+  drug_combo[3,]=temp_secondDrug-temp_both
+  drug_combo[4,]=temp_both
+  
+  try_ADE=temp_ADE[[i]] ### ADE information
+  temp_drug_ADE=1-is.na(match(ADE,try_ADE)) #match-->match
+  
+  drug_combo[,1]=drug_combo[,1]*temp_drug_ADE
+  
+  drug_combo_ADE=drug_combo_ADE+drug_combo
+  
+  cat("iter=",i,"\n")
+}
+
+drug_combo_ADE
+
+########################Omega Calculation#########################
+
+f00_ADE_terms=N001_ADE_terms/N00D[1:43,]
+f10_ADE_terms=N101_ADE_terms/N10D[1:43,]
+f01_ADE_terms=N011_ADE_terms/N01D[1:43,]
+f11_ADE_terms=N111_ADE_terms/N11D[1:43,]
+
+EXP_1_ADE_terms=pmax((f00_ADE_terms/(1-f00_ADE_terms)),
+                     (f01_ADE_terms/(1-f01_ADE_terms)))+pmax((f00_ADE_terms/(1-f00_ADE_terms)),
+                     (f10_ADE_terms/(1-f10_ADE_terms)))-(f00_ADE_terms/(1-f00_ADE_terms))+1
+EXP_2_ADE_terms=1-1/EXP_1_ADE_terms
+EXP_ADE_terms=EXP_2_ADE_terms*(N11D[1:43,])
+
+omega_0_ADE_terms_unfiltered=log((N111_ADE_terms/EXP_ADE_terms),base=2)
+write.csv(omega_0_ADE_terms_unfiltered,"omega_0_ADE_terms_unfiltered.csv",row.names=ADE_terms_names)
+
+omega_ADE_terms_unfiltered=log(((N111_ADE_terms+0.5)/(EXP_ADE_terms+0.5)),base=2)
+write.csv(omega_ADE_terms_unfiltered,"omega_ADE_terms_unfiltered.csv",row.names=ADE_terms_names)
+
+omega_sd_ADE_terms_unfiltered=1/(N111_ADE_terms*(log(2))^2)
+omega_025_ADE_terms_unfiltered=omega_0_ADE_terms_unfiltered-1.96*omega_sd_ADE_terms_unfiltered
+write.csv(omega_025_ADE_terms_unfiltered,"omega_025_ADE_terms_unfiltered.csv",row.names=ADE_terms_names)
+
+#########################Cluster Analysis#########################
+#################Remove -Inf/Inf/NA cols and rows#################
+#############################omega_0#############################
+
+rownames(omega_0_ADE_terms_unfiltered)=ADE_terms_names
+omega_0_ADE_terms_unfiltered[omega_0_ADE_terms_unfiltered==-Inf] <- 0
+omega_0_ADE_terms_unfiltered[omega_0_ADE_terms_unfiltered==Inf] <- 0
+
+omega_col=rep(0,ncol(omega_0_ADE_terms_unfiltered))
+omega_row=rep(0,nrow(omega_0_ADE_terms_unfiltered))
+
+for(m in 1:ncol(omega_0_ADE_terms_unfiltered))
+{
+  omega_col[m]=sum(omega_0_ADE_terms_unfiltered[,m])
+}
+
+for(n in 1:nrow(omega_0_ADE_terms_unfiltered))
+{
+  omega_row[n]=sum(omega_0_ADE_terms_unfiltered[n,])
+}
+
+omega_0_ADE_terms=omega_0_ADE_terms_unfiltered[omega_row!=0,omega_col!=0]
+dim(omega_0_ADE_terms)
+
+write.csv(omega_0_ADE_terms,"omega_0_ADE_terms.csv")
+
+##############################omega##############################
+
+rownames(omega_ADE_terms_unfiltered)=ADE_terms_names
+omega_ADE_terms_unfiltered[omega_ADE_terms_unfiltered==-Inf] <- 0
+omega_ADE_terms_unfiltered[omega_ADE_terms_unfiltered==Inf] <- 0
+
+omega_col=rep(0,ncol(omega_ADE_terms_unfiltered))
+omega_row=rep(0,nrow(omega_ADE_terms_unfiltered))
+
+for(m in 1:ncol(omega_ADE_terms_unfiltered))
+{
+  omega_col[m]=sum(omega_ADE_terms_unfiltered[,m])
+}
+
+for(n in 1:nrow(omega_ADE_terms_unfiltered))
+{
+  omega_row[n]=sum(omega_ADE_terms_unfiltered[n,])
+}
+
+omega_ADE_terms=omega_ADE_terms_unfiltered[omega_row!=0,omega_col!=0]
+dim(omega_ADE_terms)
+
+write.csv(omega_ADE_terms,"omega_ADE_terms.csv")
+
+############################omega_025############################
+
+rownames(omega_025_ADE_terms_unfiltered)=ADE_terms_names
+omega_025_ADE_terms_unfiltered[omega_025_ADE_terms_unfiltered==-Inf] <- 0
+omega_025_ADE_terms_unfiltered[omega_025_ADE_terms_unfiltered==Inf] <- 0
+
+omega_col=rep(0,ncol(omega_025_ADE_terms_unfiltered))
+omega_row=rep(0,nrow(omega_025_ADE_terms_unfiltered))
+
+for(m in 1:ncol(omega_025_ADE_terms_unfiltered))
+{
+  omega_col[m]=sum(omega_025_ADE_terms_unfiltered[,m])
+}
+
+for(n in 1:nrow(omega_025_ADE_terms_unfiltered))
+{
+  omega_row[n]=sum(omega_025_ADE_terms_unfiltered[n,])
+}
+
+omega_025_ADE_terms=omega_025_ADE_terms_unfiltered[omega_row!=0,omega_col!=0]
+dim(omega_025_ADE_terms)
+
+write.csv(omega_025_ADE_terms,"omega_025_ADE_terms.csv")
+
